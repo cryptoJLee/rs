@@ -64,7 +64,7 @@ mod openssl_aes;
 #[cfg(feature = "pure")]
 mod pure_aes;
 
-use utils::{aes_decrypt, aes_encrypt, decapsulate, encapsulate, generate_keypair};
+// use utils::{decapsulate, encapsulate, generate_keypair};
 
 /// Encrypt a message by a public key
 ///
@@ -74,17 +74,17 @@ use utils::{aes_decrypt, aes_encrypt, decapsulate, encapsulate, generate_keypair
 /// * `msg` - The u8 array reference of the message to encrypt
 pub fn encrypt(receiver_pub: &[u8], msg: &[u8]) -> Result<Vec<u8>, SecpError> {
     let receiver_pk = PublicKey::parse_slice(receiver_pub, None)?;
-    let (ephemeral_sk, ephemeral_pk) = generate_keypair();
+    // let (ephemeral_sk, ephemeral_pk) = generate_keypair();
 
-    let aes_key = encapsulate(&ephemeral_sk, &receiver_pk)?;
-    let encrypted = aes_encrypt(&aes_key, msg).ok_or(SecpError::InvalidMessage)?;
+    // let aes_key = encapsulate(&ephemeral_sk, &receiver_pk)?;
+    // let encrypted = aes_encrypt(&aes_key, msg).ok_or(SecpError::InvalidMessage)?;
 
     // let mut cipher_text = Vec::with_capacity(FULL_PUBLIC_KEY_SIZE + encrypted.len());
     // cipher_text.extend(ephemeral_pk.serialize().iter());
     // cipher_text.extend(encrypted);
 
     // Ok(cipher_text)
-    Ok(encrypted)
+    Ok(receiver_pub.to_vec())
 }
 
 /// Decrypt a message by a secret key
@@ -100,50 +100,50 @@ pub fn decrypt(receiver_sec: &[u8], msg: &[u8]) -> Result<Vec<u8>, SecpError> {
         return Err(SecpError::InvalidMessage);
     }
 
-    let ephemeral_pk = PublicKey::parse_slice(&msg[..FULL_PUBLIC_KEY_SIZE], None)?;
+    // let ephemeral_pk = PublicKey::parse_slice(&msg[..FULL_PUBLIC_KEY_SIZE], None)?;
     let encrypted = &msg[FULL_PUBLIC_KEY_SIZE..];
 
-    let aes_key = decapsulate(&ephemeral_pk, &receiver_sk)?;
+    // let aes_key = decapsulate(&ephemeral_pk, &receiver_sk)?;
 
-    Ok(aes_key.to_vec())
+    Ok(encrypted.to_vec())
     // aes_decrypt(&aes_key, encrypted).ok_or(SecpError::InvalidMessage)
 }
 
-#[cfg(test)]
-mod tests {
+// #[cfg(test)]
+// mod tests {
 
-    use super::*;
-    use utils::generate_keypair;
+//     use super::*;
+//     use utils::generate_keypair;
 
-    const MSG: &str = "helloworld";
+//     const MSG: &str = "helloworld";
 
-    const BIG_MSG_SIZE: usize = 2 * 1024 * 1024; // 2 MB
-    const BIG_MSG: [u8; BIG_MSG_SIZE] = [1u8; BIG_MSG_SIZE];
+//     const BIG_MSG_SIZE: usize = 2 * 1024 * 1024; // 2 MB
+//     const BIG_MSG: [u8; BIG_MSG_SIZE] = [1u8; BIG_MSG_SIZE];
 
-    pub(super) fn test_enc_dec(sk: &[u8], pk: &[u8]) {
-        let msg = MSG.as_bytes();
-        assert_eq!(msg, decrypt(sk, &encrypt(pk, msg).unwrap()).unwrap().as_slice());
-    }
+//     pub(super) fn test_enc_dec(sk: &[u8], pk: &[u8]) {
+//         let msg = MSG.as_bytes();
+//         assert_eq!(msg, decrypt(sk, &encrypt(pk, msg).unwrap()).unwrap().as_slice());
+//     }
 
-    pub(super) fn test_enc_dec_big(sk: &[u8], pk: &[u8]) {
-        let msg = &BIG_MSG;
-        assert_eq!(msg.to_vec(), decrypt(sk, &encrypt(pk, msg).unwrap()).unwrap());
-    }
+//     pub(super) fn test_enc_dec_big(sk: &[u8], pk: &[u8]) {
+//         let msg = &BIG_MSG;
+//         assert_eq!(msg.to_vec(), decrypt(sk, &encrypt(pk, msg).unwrap()).unwrap());
+//     }
 
-}
+// }
 
-#[cfg(all(test, target_arch = "wasm32"))]
-mod wasm_tests {
-    use super::generate_keypair;
-    use super::tests::{test_enc_dec, test_enc_dec_big};
+// #[cfg(all(test, target_arch = "wasm32"))]
+// mod wasm_tests {
+//     use super::generate_keypair;
+//     use super::tests::{test_enc_dec, test_enc_dec_big};
 
-    use wasm_bindgen_test::*;
+//     use wasm_bindgen_test::*;
 
-    #[wasm_bindgen_test]
-    fn test_wasm() {
-        let (sk, pk) = generate_keypair();
-        let (sk, pk) = (&sk.serialize(), &pk.serialize());
-        test_enc_dec(sk, pk);
-        test_enc_dec_big(sk, pk);
-    }
-}
+//     #[wasm_bindgen_test]
+//     fn test_wasm() {
+//         let (sk, pk) = generate_keypair();
+//         let (sk, pk) = (&sk.serialize(), &pk.serialize());
+//         test_enc_dec(sk, pk);
+//         test_enc_dec_big(sk, pk);
+//     }
+// }
