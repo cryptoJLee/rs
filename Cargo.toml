@@ -22,39 +22,39 @@ repository = "https://github.com/ecies/rs"
 [dependencies]
 #hkdf = "0.11.0"
 #secp256k1 = { package = "libsecp256k1", version = "0.6" }
-libsecp256k1 = { version = "0.3.5", default-features = false, features = ["hmac"]}
+#libsecp256k1 = { version = "0.3.5", default-features = false, features = ["hmac"]}
 #sha2 = "0.9.2"
 
 # openssl aes
-openssl = {version = "0.10.32", optional = true}
+#openssl = {version = "0.10.32", optional = true}
 
 # pure rust aes
 #aes-gcm = {version = "0.9.0", optional = true}
 #typenum = {version = "1.12.0", optional = true}
 
-[target.'cfg(target_arch = "wasm32")'.dependencies]
-rand = {version = "0.7.3", features = ["wasm-bindgen"]}
+#[target.'cfg(target_arch = "wasm32")'.dependencies]
+#rand = {version = "0.7.3", features = ["wasm-bindgen"]}
 
-[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
-rand = {version = "0.7.3"}
+#[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+#rand = {version = "0.7.3"}
 
 [features]
-default = ["openssl"]
+default = []
 pure = []
 
-[dev-dependencies]
-criterion = "0.3.3"
-hex = "0.4.2"
+#[dev-dependencies]
+#criterion = "0.3.3"
+#hex = "0.4.2"
 
-[target.'cfg(target_arch = "wasm32")'.dev-dependencies]
-wasm-bindgen-test = "0.3.19"
+#[target.'cfg(target_arch = "wasm32")'.dev-dependencies]
+#wasm-bindgen-test = "0.3.19"
 
-[target.'cfg(not(target_arch = "wasm32"))'.dev-dependencies]
-futures-util = "0.3.8"
-reqwest = "0.11.0"
-tokio = {version = "1.0.1", features = ["rt-multi-thread"]}
+#[target.'cfg(not(target_arch = "wasm32"))'.dev-dependencies]
+#futures-util = "0.3.8"
+#reqwest = "0.11.0"
+#tokio = {version = "1.0.1", features = ["rt-multi-thread"]}
 
-[[bench]]
-harness = false
-name = "simple"
-path = "bench/simple.rs"
+#[[bench]]
+#harness = false
+#name = "simple"
+#path = "bench/simple.rs"

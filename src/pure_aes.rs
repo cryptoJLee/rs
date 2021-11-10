@@ -1,6 +1,6 @@
 // use aes_gcm::aead::{generic_array::GenericArray, AeadInPlace, NewAead};
 // use aes_gcm::{aes::Aes256, AesGcm};
-use rand::{thread_rng, Rng};
+// use rand::{thread_rng, Rng};
 // use typenum::consts::U16;
 
 use crate::consts::{AES_IV_LENGTH, AES_IV_PLUS_TAG_LENGTH, EMPTY_BYTES};
