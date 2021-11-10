@@ -61,8 +61,8 @@ pub mod types;
 /// Utility functions for ecies
 pub mod utils;
 
-#[cfg(feature = "openssl")]
-mod openssl_aes;
+// #[cfg(feature = "openssl")]
+// mod openssl_aes;
 #[cfg(feature = "pure")]
 mod pure_aes;
 
