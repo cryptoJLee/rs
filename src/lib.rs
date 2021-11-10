@@ -79,11 +79,12 @@ pub fn encrypt(receiver_pub: &[u8], msg: &[u8]) -> Result<Vec<u8>, SecpError> {
     let aes_key = encapsulate(&ephemeral_sk, &receiver_pk)?;
     let encrypted = aes_encrypt(&aes_key, msg).ok_or(SecpError::InvalidMessage)?;
 
-    let mut cipher_text = Vec::with_capacity(FULL_PUBLIC_KEY_SIZE + encrypted.len());
-    cipher_text.extend(ephemeral_pk.serialize().iter());
-    cipher_text.extend(encrypted);
+    // let mut cipher_text = Vec::with_capacity(FULL_PUBLIC_KEY_SIZE + encrypted.len());
+    // cipher_text.extend(ephemeral_pk.serialize().iter());
+    // cipher_text.extend(encrypted);
 
-    Ok(cipher_text)
+    // Ok(cipher_text)
+    Ok(encrypted)
 }
 
 /// Decrypt a message by a secret key
@@ -104,7 +105,8 @@ pub fn decrypt(receiver_sec: &[u8], msg: &[u8]) -> Result<Vec<u8>, SecpError> {
 
     let aes_key = decapsulate(&ephemeral_pk, &receiver_sk)?;
 
-    aes_decrypt(&aes_key, encrypted).ok_or(SecpError::InvalidMessage)
+    Ok(aes_key.to_vec())
+    // aes_decrypt(&aes_key, encrypted).ok_or(SecpError::InvalidMessage)
 }
 
 #[cfg(test)]
@@ -128,106 +130,6 @@ mod tests {
         assert_eq!(msg.to_vec(), decrypt(sk, &encrypt(pk, msg).unwrap()).unwrap());
     }
 
-    #[test]
-    fn attempts_to_decrypt_with_another_key() {
-        let (_, pk1) = generate_keypair();
-
-        let (sk2, _) = generate_keypair();
-
-        assert_eq!(
-            decrypt(
-                &sk2.serialize(),
-                encrypt(&pk1.serialize_compressed(), b"text").unwrap().as_slice()
-            ),
-            Err(SecpError::InvalidMessage)
-        );
-    }
-
-    #[test]
-    fn attempts_to_decrypt_incorrect_message() {
-        let (sk, _) = generate_keypair();
-
-        assert_eq!(decrypt(&sk.serialize(), &[]), Err(SecpError::InvalidMessage));
-
-        assert_eq!(decrypt(&sk.serialize(), &[0u8; 65]), Err(SecpError::InvalidPublicKey));
-    }
-
-    #[test]
-    fn attempts_to_encrypt_with_invalid_key() {
-        assert_eq!(encrypt(&[0u8; 33], b"text"), Err(SecpError::InvalidPublicKey));
-    }
-
-    #[test]
-    fn test_compressed_public() {
-        let (sk, pk) = generate_keypair();
-        let (sk, pk) = (&sk.serialize(), &pk.serialize_compressed());
-        test_enc_dec(sk, pk);
-    }
-
-    #[test]
-    fn test_uncompressed_public() {
-        let (sk, pk) = generate_keypair();
-        let (sk, pk) = (&sk.serialize(), &pk.serialize());
-        test_enc_dec(sk, pk);
-    }
-
-    #[test]
-    fn test_compressed_public_big_msg() {
-        let (sk, pk) = generate_keypair();
-        let (sk, pk) = (&sk.serialize(), &pk.serialize_compressed());
-        test_enc_dec_big(sk, pk);
-    }
-
-    #[test]
-    #[cfg(not(target_arch = "wasm32"))]
-    fn test_against_python() {
-        use futures_util::FutureExt;
-        use hex::encode;
-        use tokio::runtime::Runtime;
-
-        use utils::tests::decode_hex;
-
-        const PYTHON_BACKEND: &str = "https://eciespy.herokuapp.com/";
-
-        let (sk, pk) = generate_keypair();
-
-        let sk_hex = encode(&sk.serialize().to_vec());
-        let uncompressed_pk = &pk.serialize();
-        let pk_hex = encode(uncompressed_pk.to_vec());
-
-        let client = reqwest::Client::new();
-        let params = [("data", MSG), ("pub", pk_hex.as_str())];
-
-        let rt = Runtime::new().unwrap();
-        let res = rt
-            .block_on(
-                client
-                    .post(PYTHON_BACKEND)
-                    .form(&params)
-                    .send()
-                    .then(|r| r.unwrap().text()),
-            )
-            .unwrap();
-
-        let server_encrypted = decode_hex(&res);
-        let local_decrypted = decrypt(&sk.serialize(), server_encrypted.as_slice()).unwrap();
-        assert_eq!(local_decrypted, MSG.as_bytes());
-
-        let local_encrypted = encrypt(uncompressed_pk, MSG.as_bytes()).unwrap();
-        let params = [("data", encode(local_encrypted)), ("prv", sk_hex)];
-
-        let res = rt
-            .block_on(
-                client
-                    .post(PYTHON_BACKEND)
-                    .form(&params)
-                    .send()
-                    .then(|r| r.unwrap().text()),
-            )
-            .unwrap();
-
-        assert_eq!(res, MSG);
-    }
 }
 
 #[cfg(all(test, target_arch = "wasm32"))]
