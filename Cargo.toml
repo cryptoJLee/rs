@@ -24,7 +24,7 @@ repository = "https://github.com/ecies/rs"
 #secp256k1 = { package = "libsecp256k1", version = "0.6" }
 libsecp256k1 = { version = "0.3.5", default-features = false, features = ["hmac"]}
 #sha2 = "0.9.1"
-sha3 = "0.9.1"
+#sha3 = "0.9.1"
 
 # openssl aes
 #openssl = {version = "0.10.32", optional = true}

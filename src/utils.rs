@@ -1,7 +1,7 @@
 // use hkdf::Hkdf;
 use rand::thread_rng;
 use secp256k1::{util::FULL_PUBLIC_KEY_SIZE, Error as SecpError, PublicKey, SecretKey};
-use sha3::{Digest, Sha3_256};
+// use sha3::{Digest, Sha3_256};
 
 use crate::consts::EMPTY_BYTES;
 use crate::types::AesKey;
@@ -50,13 +50,14 @@ fn hkdf_sha256(master: &[u8]) -> Result<AesKey, SecpError> {
     //     .map_err(|_| SecpError::InvalidInputLength)?;
     // Ok(out)
     //! // create a SHA3-256 object
-    let mut hasher = Sha3_256::new();
+    // let mut hasher = Sha3_256::new();
 
-    // write input message
-    hasher.update(master);
+    // // write input message
+    // hasher.update(master);
 
-    // read hash digest
-    let result = hasher.finalize();
-    Ok(result.into())
+    // // read hash digest
+    // let result = hasher.finalize();
+    // Ok(result.into())
+    Ok([0u8; 32])
 }
 
