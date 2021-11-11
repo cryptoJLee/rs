@@ -20,7 +20,7 @@ homepage = "https://ecies.org/rs/"
 repository = "https://github.com/ecies/rs"
 
 [dependencies]
-hkdf = "0.11.0"
+#hkdf = "0.11.0"
 #secp256k1 = { package = "libsecp256k1", version = "0.6" }
 libsecp256k1 = { version = "0.3.5", default-features = false, features = ["hmac"]}
 #sha2 = "0.9.1"
