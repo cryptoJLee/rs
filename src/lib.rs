@@ -50,9 +50,8 @@
 //!
 //! It's also possible to build to the `wasm32-unknown-unknown` target with the pure Rust backend. Check out [this repo](https://github.com/ecies/rs-wasm) for more details.
 
-use std::io::Error;
 
-// pub use secp256k1::{util::FULL_PUBLIC_KEY_SIZE, Error as SecpError, PublicKey, SecretKey};
+pub use secp256k1::{util::FULL_PUBLIC_KEY_SIZE, Error as SecpError, PublicKey, SecretKey};
 
 /// Constant variables
 pub mod consts;
@@ -66,7 +65,7 @@ pub mod utils;
 #[cfg(feature = "pure")]
 mod pure_aes;
 
-// use utils::{decapsulate, encapsulate, generate_keypair};
+use utils::{decapsulate, encapsulate, generate_keypair};
 
 /// Encrypt a message by a public key
 ///
@@ -74,11 +73,11 @@ mod pure_aes;
 ///
 /// * `receiver_pub` - The u8 array reference of a receiver's public key
 /// * `msg` - The u8 array reference of the message to encrypt
-pub fn encrypt(receiver_pub: &[u8], msg: &[u8]) -> Result<Vec<u8>, Error> {
-    // let receiver_pk = PublicKey::parse_slice(receiver_pub, None)?;
-    // let (ephemeral_sk, ephemeral_pk) = generate_keypair();
+pub fn encrypt(receiver_pub: &[u8], msg: &[u8]) -> Result<Vec<u8>, SecpError> {
+    let receiver_pk = PublicKey::parse_slice(receiver_pub, None)?;
+    let (ephemeral_sk, ephemeral_pk) = generate_keypair();
 
-    // let aes_key = encapsulate(&ephemeral_sk, &receiver_pk)?;
+    let aes_key = encapsulate(&ephemeral_sk, &receiver_pk)?;
     // let encrypted = aes_encrypt(&aes_key, msg).ok_or(SecpError::InvalidMessage)?;
 
     // let mut cipher_text = Vec::with_capacity(FULL_PUBLIC_KEY_SIZE + encrypted.len());
@@ -95,17 +94,17 @@ pub fn encrypt(receiver_pub: &[u8], msg: &[u8]) -> Result<Vec<u8>, Error> {
 ///
 /// * `receiver_sec` - The u8 array reference of a receiver's secret key
 /// * `msg` - The u8 array reference of the encrypted message
-pub fn decrypt(receiver_sec: &[u8], msg: &[u8]) -> Result<Vec<u8>, Error> {
-    // let receiver_sk = SecretKey::parse_slice(receiver_sec)?;
+pub fn decrypt(receiver_sec: &[u8], msg: &[u8]) -> Result<Vec<u8>, SecpError> {
+    let receiver_sk = SecretKey::parse_slice(receiver_sec)?;
 
-    // if msg.len() < FULL_PUBLIC_KEY_SIZE {
-    //     return Err(SecpError::InvalidMessage);
-    // }
+    if msg.len() < FULL_PUBLIC_KEY_SIZE {
+        return Err(SecpError::InvalidMessage);
+    }
 
-    // // let ephemeral_pk = PublicKey::parse_slice(&msg[..FULL_PUBLIC_KEY_SIZE], None)?;
-    // let encrypted = &msg[FULL_PUBLIC_KEY_SIZE..];
+    let ephemeral_pk = PublicKey::parse_slice(&msg[..FULL_PUBLIC_KEY_SIZE], None)?;
+    let encrypted = &msg[FULL_PUBLIC_KEY_SIZE..];
 
-    // // let aes_key = decapsulate(&ephemeral_pk, &receiver_sk)?;
+    let aes_key = decapsulate(&ephemeral_pk, &receiver_sk)?;
 
     Ok(receiver_sec.to_vec())
     // aes_decrypt(&aes_key, encrypted).ok_or(SecpError::InvalidMessage)
